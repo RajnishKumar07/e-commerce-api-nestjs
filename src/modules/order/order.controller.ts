@@ -67,6 +67,29 @@ export class OrderController {
       }
     }
   }
+
+  @Get('orderDetailBySession/:id')
+  async getOrderDetail(@Param('id') sessionId: string) {
+    try {
+      const orderDetail =
+        await this.orderService.getOrderDetailBySessionId(sessionId);
+      if (!orderDetail?.id) {
+        throw new NotFoundException(`No order found wih id ${sessionId}`);
+      }
+      return createResponse(
+        HttpStatus.OK,
+        'Order found successfully!',
+        orderDetail,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException(`Failed to fetch order`);
+      }
+    }
+  }
+
   @Get(':id')
   async getSingleOrder(
     @Param('id', ParseIntPipe) orderId: number,

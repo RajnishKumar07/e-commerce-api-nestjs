@@ -115,7 +115,7 @@ export class ProductReservationsService {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES, { name: 'clear_reserved_inventory' })
+  @Cron(CronExpression.EVERY_30_MINUTES, { name: 'clear_reserved_inventory' })
   async clearReservedInventory() {
     console.log('clear_reserved_inventory conjob started: ', new Date());
     // const expiredReservations = await this.productReservationRepository

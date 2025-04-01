@@ -172,4 +172,13 @@ export class OrderService {
       .orderBy('createdAt', 'DESC')
       .getMany();
   }
+
+  async getOrderDetailBySessionId(sessionId: string) {
+    return await this.orderRepository.findOne({
+      relations: ['orderItem'],
+      where: {
+        checkoutSessionId: sessionId,
+      },
+    });
+  }
 }
