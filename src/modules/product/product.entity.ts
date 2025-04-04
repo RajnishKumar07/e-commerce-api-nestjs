@@ -1,3 +1,4 @@
+import { Cart } from 'src/modules/cart/entity/cart.entity';
 import { OrderItem } from 'src/modules/order/entity/order-item.entity';
 import { ProductReservations } from 'src/modules/product-reservations/product-reservations.entity';
 import { Review } from 'src/modules/review/review.entity';
@@ -94,6 +95,9 @@ export class Product {
     },
   )
   productReservations: ProductReservations;
+
+  @OneToMany(() => Cart, (cart) => cart.product)
+  cart: Cart;
 
   @CreateDateColumn()
   createdAt: Date;

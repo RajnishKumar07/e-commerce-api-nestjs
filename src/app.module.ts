@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { LoggingMiddleware } from './common/middlewares/logging.middleware';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductReservationsModule } from './modules/product-reservations/product-reservations.module';
 import { ProductModule } from './modules/product/product.module';
@@ -41,6 +42,7 @@ import { UserModule } from './modules/user/user.module';
     ReviewModule,
     OrderModule,
     ProductReservationsModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

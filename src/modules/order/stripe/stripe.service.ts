@@ -74,7 +74,7 @@ export class StripeService {
           );
         const { quantity: reservedQnt = 0 } = productReservedByOther ?? {};
         const { inventory } = dbProduct;
-        if (inventory - reservedQnt < item.amount) {
+        if (inventory - reservedQnt < item.quantity) {
           throw new BadRequestException(`Product ${item.name} is out of stock`);
         }
         const productReservation = await this.productReservationService.findOne(
@@ -84,7 +84,7 @@ export class StripeService {
         );
         console.log('Already Exist==============>', productReservation);
         if (productReservation) {
-          const quantity = productReservation.quantity + item.amount;
+          const quantity = productReservation.quantity + item.quantity;
           await this.productReservationService.updateProductReservation(
             queryRunner.manager,
             item.productId,
@@ -96,7 +96,7 @@ export class StripeService {
             queryRunner.manager,
             item.productId,
             user.userId,
-            item.amount,
+            item.quantity,
           );
         }
 
@@ -106,7 +106,7 @@ export class StripeService {
             product_data: { name: dbProduct.name },
             unit_amount: Number(dbProduct.price) * 100, // $20.00 or Rs 20
           },
-          quantity: item.amount,
+          quantity: item.quantity,
         });
       }
       await queryRunner.commitTransaction();
@@ -146,7 +146,7 @@ export class StripeService {
 
     const orderItem = items.map((item) => ({
       productId: item.productId,
-      quantity: item.amount,
+      quantity: item.quantity,
     }));
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Cart } from 'src/modules/cart/entity/cart.entity';
 import { OrderItem } from 'src/modules/order/entity/order-item.entity';
 import { Order } from 'src/modules/order/entity/order.entity';
 import { ProductReservations } from 'src/modules/product-reservations/product-reservations.entity';
@@ -22,6 +23,7 @@ import { StripeService } from './stripe/stripe.service';
       Product,
       User,
       ProductReservations,
+      Cart,
     ]),
   ],
   providers: [

@@ -16,7 +16,7 @@ export class CreateOrderItemDto {
 
   @IsInt()
   @IsNotEmpty()
-  amount: number;
+  quantity: number;
 
   @IsNumber()
   @IsNotEmpty()

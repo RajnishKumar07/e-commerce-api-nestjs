@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ITokenUser } from 'src/common/utils/create-token-user';
+import { Cart } from 'src/modules/cart/entity/cart.entity';
 import { OrderItem } from 'src/modules/order/entity/order-item.entity';
 import { Order } from 'src/modules/order/entity/order.entity';
 import { ProductReservations } from 'src/modules/product-reservations/product-reservations.entity';
@@ -105,6 +106,13 @@ export class OrderService {
       await queryRunner.manager.save(order);
       await queryRunner.manager.save(orderItems);
 
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(Cart)
+        .where('userId=:userId', { userId: user.id })
+        .execute();
+
       await queryRunner.commitTransaction(); // Commit transaction if successful
 
       return { order };
@@ -141,10 +149,8 @@ export class OrderService {
     orderQb.skip(skip).limit(limit);
 
     for (const so of sort) {
-      orderQb.addOrderBy(
-        so.key,
-        so.value.toLocaleUpperCase() as 'ASC' | 'DESC',
-      );
+      const key = `order.${so.key}`;
+      orderQb.addOrderBy(key, so.value.toLocaleUpperCase() as 'ASC' | 'DESC');
     }
 
     const [orders, totalOrders] = await orderQb.getManyAndCount();
@@ -169,7 +175,7 @@ export class OrderService {
       .innerJoin('order.user', 'user')
       .addSelect(['user.id', 'user.name'])
       .where('user.id=:id', { id: user.userId })
-      .orderBy('createdAt', 'DESC')
+      .orderBy('order.createdAt', 'DESC')
       .getMany();
   }
 
