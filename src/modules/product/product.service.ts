@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AppLoggerService } from 'src/modules/logger/logger.service';
 import { CreateProductDto } from 'src/modules/product/dto/create-product.dto';
 import { UpdateProductDto } from 'src/modules/product/dto/update-product.dto';
 import { Product } from 'src/modules/product/product.entity';
@@ -15,12 +16,15 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class ProductService {
   constructor(
+    private readonly logger: AppLoggerService,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    logger.setContext(ProductService.name);
+  }
   uploadFile(file: Express.Multer.File): { image: string } {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -44,6 +48,7 @@ export class ProductService {
   }
 
   async getAllProducts(query: ListQueryDto, userId: number) {
+    this.logger.log('Fetching product');
     const { search, sort, page = 1, limit = 10 } = query;
     const skip = limit * (page - 1);
 
@@ -83,6 +88,7 @@ export class ProductService {
     const totalProducts = await productQB.getCount();
     const numOfPages = Math.ceil(totalProducts / limit);
 
+    this.logger.log('Product Fetched');
     return {
       products,
       totalProducts,

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { checkPermissions } from 'src/common/utils/check-permission.util';
 import { ITokenUser } from 'src/common/utils/create-token-user';
+import { AppLoggerService } from 'src/modules/logger/logger.service';
 import { Product } from 'src/modules/product/product.entity';
 import { CreateReviewDto } from 'src/modules/review/dto/create-review.dto';
 import { UpdateReviewDto } from 'src/modules/review/dto/update-review.dto';
@@ -12,12 +13,15 @@ import { DataSource, Repository } from 'typeorm';
 @Injectable()
 export class ReviewService {
   constructor(
+    private readonly logger: AppLoggerService,
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private dataSource: DataSource, // Used for transactions
-  ) {}
+  ) {
+    this.logger.setContext(ReviewService.name);
+  }
 
   async createReview(
     user: User,

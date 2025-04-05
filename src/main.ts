@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
+import { Logger } from 'nestjs-pino';
 import * as path from 'path';
+import { AppLoggerService } from 'src/modules/logger/logger.service';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -11,10 +13,14 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
+    bufferLogs: true,
   });
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('JWT_SECRET');
+
   app.use(cookieParser(cookieSecret));
+
+  app.useLogger(app.get(Logger));
 
   // Enable validation globally
   app.useGlobalPipes(
@@ -25,7 +31,9 @@ async function bootstrap() {
   );
 
   // Register global interceptor
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const logger = app.get(AppLoggerService); //  Get logger from DI container
+  app.useGlobalFilters(new HttpExceptionFilter(logger)); //  Pass logger manually
+
   app.useGlobalInterceptors(new TransformInterceptor());
   // Enable CORS
   app.enableCors({
