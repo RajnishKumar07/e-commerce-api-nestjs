@@ -4,6 +4,10 @@ import { Request } from 'express';
 export const CurrentUser = createParamDecorator(
   (data: unknown, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest<Request>();
-    return data ? request['user'][data] : request['user'];
+    const user = request['user']; // May be undefined for public routes
+
+    if (!user) return undefined; // Return undefined if no user is attached
+
+    return data ? user[data as keyof typeof user] : user;
   },
 );

@@ -51,19 +51,25 @@ export class ProductService {
       .createQueryBuilder('product')
       .select('product.*')
       .leftJoin('product.productReservations', 'pr')
-      .leftJoin('pr.user', 'pr_user')
-      .addSelect(
+      .leftJoin('pr.user', 'pr_user');
+
+    // 👇 Conditionally add reservedProductCount
+    if (userId) {
+      productQB.addSelect(
         'CAST(COALESCE(SUM(CASE WHEN pr_user.id!=:userId THEN pr.quantity ELSE 0 END), 0) AS UNSIGNED)',
         'reservedProductCount',
-      )
-      .setParameter('userId', userId)
-      .groupBy('product.id');
+      );
+      productQB.setParameter('userId', userId);
+    } else {
+      productQB.addSelect('0', 'reservedProductCount');
+    }
+
     console.log('query---->', productQB.getQuery());
     if (search) {
       productQB.where('product.name Like :search', { search: `%${search}%` });
     }
 
-    productQB.skip(skip).limit(limit);
+    productQB.groupBy('product.id').skip(skip).limit(limit);
 
     // Sorting
     if (sort && sort.length > 0) {

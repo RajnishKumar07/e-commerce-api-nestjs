@@ -161,7 +161,7 @@ export class StripeService {
       }, // Attach metadata (e.g., order ID)
       billing_address_collection: 'required',
       customer_email: user.email,
-      expires_at: Math.floor(Date.now() / 1000) + 1800, // Expires in 5 minutes
+      expires_at: Math.floor(Date.now() / 1000) + 10800, // Expires in 30 minutes
 
       // shipping_address_collection: {
       //   allowed_countries: ['IN'],

@@ -20,6 +20,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { IsPublic } from 'src/common/decorators/is-public.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { multerConfig } from 'src/common/utils/multer.config';
 import {
@@ -84,6 +85,7 @@ export class ProductController {
   }
 
   @Get()
+  @IsPublic()
   async getAllProducts(
     @Query() query: ListQueryDto,
     @CurrentUser('userId') userId: number,
@@ -107,6 +109,7 @@ export class ProductController {
   }
 
   @Get(':id')
+  @IsPublic()
   async getSingleProduct(
     @Param('id', ParseIntPipe) productId: number,
     @CurrentUser('userId') userId: number,
