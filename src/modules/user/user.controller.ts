@@ -4,12 +4,14 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
@@ -24,6 +26,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ITokenUser } from 'src/common/utils/create-token-user';
 import { createResponse } from 'src/common/utils/response.util';
+import { UpdatePasswordDto } from 'src/modules/user/dto/update-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -151,6 +154,34 @@ export class UserController {
         'Failed to retrieve user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  @Put('updateUserPassword')
+  @ApiOperation({
+    summary: 'Update your password',
+    description: 'Set your new password',
+  })
+  @ApiOkResponse({
+    description: 'Password updated successfully',
+  })
+  @ApiInternalServerErrorResponse({ description: 'Failed to update password' })
+  @ApiBadRequestResponse({
+    description: 'Invalid credential',
+  })
+  async updateUserPassword(
+    @Body() body: UpdatePasswordDto,
+    @CurrentUser() user: ITokenUser,
+  ) {
+    try {
+      await this.userService.updateUserPassword(user.userId, body);
+
+      return createResponse(HttpStatus.OK, 'Password updated successfully');
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update password');
     }
   }
 

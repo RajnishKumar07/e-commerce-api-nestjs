@@ -1,6 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { UpdatePasswordDto } from 'src/modules/user/dto/update-password.dto';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -129,5 +135,23 @@ export class UserService {
   private async hashPassword(password: string) {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
+  }
+
+  async updateUserPassword(userId: number, body: UpdatePasswordDto) {
+    const { newPassword, oldPassword } = body;
+
+    const user = await this.findUserById(userId);
+
+    const isPasswordMatch = await this.comparePasswords(
+      oldPassword,
+      user.password,
+    );
+    if (!isPasswordMatch) {
+      throw new BadRequestException('Invalid credential');
+    }
+
+    user.password = await this.hashPassword(newPassword);
+
+    return this.userRepository.save(user);
   }
 }

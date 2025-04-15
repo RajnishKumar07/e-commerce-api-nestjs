@@ -168,7 +168,7 @@ Use **Postman** or **Swagger** to test the API.
 Swagger UI will be available at:
 
 ```
-http://localhost:3000/api
+http://localhost:3000/
 ```
 
 ## 🤝 Contributing
