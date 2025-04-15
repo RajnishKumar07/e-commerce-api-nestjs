@@ -13,6 +13,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { checkPermissions } from 'src/common/utils/check-permission.util';
@@ -24,6 +32,8 @@ import { UpdateReviewDto } from 'src/modules/review/dto/update-review.dto';
 import { ReviewService } from 'src/modules/review/review.service';
 import { UserService } from 'src/modules/user/user.service';
 
+@ApiTags('Reviews')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('reviews')
 export class ReviewController {
@@ -32,7 +42,14 @@ export class ReviewController {
     private reviewService: ReviewService,
     private userService: UserService,
   ) {}
+
   @Post()
+  @ApiOperation({ summary: 'Create a review for a product' })
+  @ApiResponse({ status: 201, description: 'Review created successfully' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid product or duplicate review',
+  })
   async createReview(
     @CurrentUser('userId') userId: number,
     @Body() createReviewDto: CreateReviewDto,
@@ -65,7 +82,7 @@ export class ReviewController {
       );
 
       return createResponse(
-        HttpStatus.OK,
+        HttpStatus.CREATED,
         'Review created successfully!',
         review,
       );
@@ -79,6 +96,8 @@ export class ReviewController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all reviews' })
+  @ApiResponse({ status: 200, description: 'All reviews fetched successfully' })
   async getAllReview() {
     try {
       const review = await this.reviewService.getAllReview();
@@ -89,6 +108,10 @@ export class ReviewController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a single review by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'Review ID' })
+  @ApiResponse({ status: 200, description: 'Review found successfully' })
+  @ApiResponse({ status: 404, description: 'No Review Found with this ID' })
   async getSingleReview(@Param('id', ParseIntPipe) reviewId: number) {
     try {
       if (!reviewId) {
@@ -114,6 +137,10 @@ export class ReviewController {
   }
 
   @Post(':id')
+  @ApiOperation({ summary: 'Update a review by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'Review ID' })
+  @ApiResponse({ status: 200, description: 'Review updated successfully' })
+  @ApiResponse({ status: 404, description: 'No review found' })
   async updateReview(
     @Param('id', ParseIntPipe) reviewId: number,
     @Body() updateReviewDto: UpdateReviewDto,
@@ -140,6 +167,10 @@ export class ReviewController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a review by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'Review ID' })
+  @ApiResponse({ status: 200, description: 'Review deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
   async deleteReview(
     @Param('id', ParseIntPipe) reviewId: number,
     @CurrentUser() user: ITokenUser,

@@ -10,6 +10,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -24,6 +31,8 @@ import { OrderService } from 'src/modules/order/order.service';
 import { UserRole } from 'src/modules/user/user.entity';
 import { ListQueryDto } from 'src/shared/dto/list-query.dto';
 
+@ApiTags('Orders')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('orders')
 export class OrderController {
@@ -32,6 +41,9 @@ export class OrderController {
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN)
   @Get()
+  @ApiOperation({ summary: 'Get all orders (Admin only)' })
+  @ApiResponse({ status: 200, description: 'List of all orders' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getAllOrders(@Query() query: ListQueryDto) {
     try {
       const { page, limit } = query;
@@ -50,6 +62,9 @@ export class OrderController {
   }
 
   @Get('showAllMyOrders')
+  @ApiOperation({ summary: 'Get orders for the current user' })
+  @ApiResponse({ status: 200, description: 'User orders fetched successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getCurrentUserOrders(@CurrentUser() user: ITokenUser) {
     try {
       const orders = await this.orderService.getCurrentUserOrders(user);
@@ -69,6 +84,13 @@ export class OrderController {
   }
 
   @Get('orderDetailBySession/:id')
+  @ApiOperation({ summary: 'Get order detail by Stripe session ID' })
+  @ApiParam({ name: 'id', description: 'Stripe session ID', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Order detail fetched successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderDetail(@Param('id') sessionId: string) {
     try {
       const orderDetail =
@@ -91,6 +113,10 @@ export class OrderController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get single order by order ID' })
+  @ApiParam({ name: 'id', description: 'Order ID', type: Number })
+  @ApiResponse({ status: 200, description: 'Order fetched successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
   async getSingleOrder(
     @Param('id', ParseIntPipe) orderId: number,
     @CurrentUser() user: ITokenUser,

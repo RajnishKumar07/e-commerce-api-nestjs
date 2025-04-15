@@ -11,6 +11,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ITokenUser } from 'src/common/utils/create-token-user';
@@ -20,6 +27,10 @@ import { OrderService } from 'src/modules/order/order.service';
 import { StripeService } from 'src/modules/order/stripe/stripe.service';
 import { ProductReservationsService } from 'src/modules/product-reservations/product-reservations.service';
 
+//To test event in local , need to forward route
+// stripe listen --forward-to http://localhost:3000/stripe/webhook
+
+@ApiTags('Stripe')
 @Controller('stripe')
 export class StripeController {
   constructor(
@@ -30,10 +41,29 @@ export class StripeController {
 
   @UseGuards(AuthGuard)
   @Post('create-checkout-session')
+  @ApiOperation({ summary: 'Create a Stripe checkout session' })
+  @ApiBody({ type: CreateOrderDto, description: 'Order details' })
+  @ApiQuery({
+    name: 'successUrl',
+    required: true,
+    type: String,
+    description: 'The URL to redirect to after a successful payment',
+  })
+  @ApiQuery({
+    name: 'cancelUrl',
+    required: true,
+    type: String,
+    description: 'The URL to redirect to after a canceled payment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Checkout session created successfully',
+    type: Object,
+  })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async createCheckoutSession(
     @CurrentUser() user: ITokenUser,
     @Body('order') createOrderDto: CreateOrderDto,
-    // @Body('orderId') orderId: number,
     @Body('successUrl') successUrl: string,
     @Body('cancelUrl') cancelUrl: string,
   ) {
@@ -55,14 +85,11 @@ export class StripeController {
         payment_intent: paymentIntentId,
         id: checkoutSessionId,
       } = session;
-      console.log('paymentIntentId=========>', paymentIntentId);
-      console.log('checkoutSessionId=========>', checkoutSessionId);
 
       return createResponse(HttpStatus.OK, 'Checkout session created!', {
         url,
       });
     } catch (error) {
-      console.log('error----->', error);
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -72,6 +99,12 @@ export class StripeController {
   }
 
   @Post('webhook')
+  @ApiOperation({ summary: 'Handle Stripe webhook events' })
+  @ApiResponse({
+    status: 200,
+    description: 'Webhook event processed successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   async handleWebhook(
     @Req() req: RawBodyRequest<Request>,
     @Headers('stripe-signature') signature: string,
@@ -80,7 +113,7 @@ export class StripeController {
 
     try {
       const event = this.stripeService.constructEvent(rawBody, signature);
-      // console.log('webhook event---------->', event.type, event.data.object);
+
       switch (event.type) {
         // case 'payment_intent.succeeded': {
         //   const paymentIntent = event.data.object;
@@ -122,6 +155,7 @@ export class StripeController {
           );
           break;
         }
+
         case 'checkout.session.expired': {
           const session = event.data.object;
           const orderItem = JSON.parse(session.metadata.orderItem) as {
@@ -137,7 +171,7 @@ export class StripeController {
         }
 
         default:
-          console.log(`Unhandled event type: ${event.type}`, event.data.object);
+          console.log(`Unhandled event type: ${event.type}`);
       }
 
       return { received: true };

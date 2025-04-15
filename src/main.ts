@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as path from 'path';
 import { AppModule } from './app.module';
@@ -38,6 +39,35 @@ async function bootstrap() {
   // Serve static files from the "uploads" folder
   app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
     prefix: '/uploads', // Access files via "/uploads/<filename>"
+  });
+
+  // Swagger config
+  const config = new DocumentBuilder()
+    .setTitle('E-COMMERCE-API')
+    .setDescription(
+      `
+    ## Authentication Flow
+    1. First call the /auth/login endpoint
+    2. It will set an httpOnly cookie named 'token'
+    3. All subsequent requests will automatically use this cookie
+  `,
+    )
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('', app, document, {
+    swaggerOptions: {
+      defaultModelsExpandDepth: -1, // cleaner UI
+      docExpansion: 'none',
+      operationsSorter: (a, b) => {
+        if (a.get('path').includes('login')) return -1;
+        return a.get('method').localeCompare(b.get('method'));
+      },
+
+      tagsSorter: 'alpha',
+      withCredentials: true, // crucial for cookies
+    },
   });
   await app.listen(process.env.PORT ?? 3000);
 }
