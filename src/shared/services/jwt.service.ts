@@ -30,7 +30,7 @@ export class HandleJwtService {
             signed: true,
             secure: true,
             sameSite: 'none',
-            domain: 'e-commerce-api-yyqb.onrender.com',
+            // domain: 'e-commerce-api-yyqb.onrender.com',
           }
         : {
             httpOnly: true,

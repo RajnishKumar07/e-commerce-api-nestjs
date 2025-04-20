@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
   Get,
   HttpException,
   HttpStatus,
@@ -88,10 +87,7 @@ export class ProductController {
   uploadFile(
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: /(jpg|jpeg|png|gif)$/ }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 1 * 1024 * 1024 })],
       }),
     )
     file: Express.Multer.File,
