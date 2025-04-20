@@ -12,7 +12,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # ✅ This renames .env.production to .env inside container
-COPY .production.env .env
+# COPY .production.env .env
 
 # Build the project
 RUN npm run build
