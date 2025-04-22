@@ -11,5 +11,5 @@ export const getDatabaseConfig = (
   password: configService.get('DB_PASSWORD'),
   database: configService.get('DB_NAME'),
   autoLoadEntities: true,
-  synchronize: true, // Disable in production!
+  synchronize: configService.get('NODE_ENV') === 'development', // Disable in production!
 });
