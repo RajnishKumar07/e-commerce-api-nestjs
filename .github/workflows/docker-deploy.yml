@@ -27,14 +27,13 @@ jobs:
         with:
           context: .
           push: true
-          tags: rajnishkumar07/ecommerce-api-nest:latest
+          tags: yourdockerhubusername/yourimagename:latest
 
-      - name: 📦 Install Koyeb CLI
-        run: curl -sSfL https://cli.koyeb.com/install.sh | sh
+      - name: ⚙️ Install and Configure Koyeb CLI
+        uses: koyeb-community/koyeb-actions@v2
+        with:
+          api_token: ${{ secrets.KOYEB_API_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🚀 Redeploy service on Koyeb
-        env:
-          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
-        run: |
-          ~/.koyeb/bin/koyeb auth login --token $KOYEB_API_TOKEN
-          ~/.koyeb/bin/koyeb service redeploy costly-luciana/ecommerce-api-nest
+      - name: 🚀 Redeploy Koyeb Service
+        run: koyeb service redeploy costly-luciana/ecommerce-api-nest
