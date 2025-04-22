@@ -1,12 +1,12 @@
-name: Build and Push Docker Image
+name: 🚀 Build and Deploy to Docker Hub + Koyeb
 
 on:
   push:
     branches:
-      - master # change to your default branch if it's not 'main'
+      - master # change to your default branch if it's not 'master'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +28,13 @@ jobs:
           context: .
           push: true
           tags: rajnishkumar07/ecommerce-api-nest:latest
+
+      - name: 📦 Install Koyeb CLI
+        run: curl -sSfL https://cli.koyeb.com/install.sh | sh
+
+      - name: 🚀 Redeploy service on Koyeb
+        env:
+          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
+        run: |
+          ~/.koyeb/bin/koyeb auth login --token $KOYEB_API_TOKEN
+          ~/.koyeb/bin/koyeb service redeploy costly-luciana/ecommerce-api-nest
