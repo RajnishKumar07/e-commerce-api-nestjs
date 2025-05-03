@@ -1,4 +1,4 @@
-name: 🚀 Build and Deploy to Docker Hub + Koyeb
+name: Build and Deploy to Docker Hub + Koyeb
 
 on:
   push:
