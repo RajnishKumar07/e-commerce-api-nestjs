@@ -57,7 +57,7 @@ export class Product {
   @Column({ type: 'enum', enum: ProductCompany })
   company: ProductCompany;
 
-  @Column('simple-array', { nullable: false })
+  @Column('simple-array', { nullable: true })
   colors: string[];
 
   @Column({ type: 'boolean', default: false })

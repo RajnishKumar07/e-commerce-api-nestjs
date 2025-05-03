@@ -64,6 +64,7 @@ export class ProductController {
         product,
       );
     } catch (error) {
+      console.log('error', error);
       throw new InternalServerErrorException('Failed to create Product');
     }
   }
