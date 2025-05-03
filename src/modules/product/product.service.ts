@@ -25,8 +25,16 @@ export class ProductService {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    const port = this.configService.get<string>('PORT');
-    const hostUrl = `http://localhost:${port}`;
+
+    let hostUrl = this.configService.get<string>('APP_URL');
+    const isDevMode =
+      this.configService.get<string>('NODE_ENV') === 'development';
+
+    if (isDevMode) {
+      const port = this.configService.get<string>('PORT');
+      hostUrl = `http://localhost:${port}`;
+    }
+
     const imageUrl = `${hostUrl}/uploads/${file.filename}`;
     return { image: imageUrl };
   }
