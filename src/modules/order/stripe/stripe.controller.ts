@@ -110,7 +110,8 @@ export class StripeController {
     @Headers('stripe-signature') signature: string,
   ) {
     const rawBody = req.rawBody;
-
+    console.log('Raw Body:', req.rawBody?.toString());
+    console.log('Headers:', req.headers);
     try {
       const event = this.stripeService.constructEvent(rawBody, signature);
 

@@ -17,11 +17,6 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('JWT_SECRET');
 
-  // ⚠️ Stripe Webhook raw body (must come before any body parser)
-  app.use('/webhook', express.raw({ type: 'application/json' }));
-
-  // // Regular body parsers for other routes
-  // app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
   // Cookie parser for reading signed/unsigned cookies
