@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
 import * as path from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -15,6 +16,15 @@ async function bootstrap() {
   });
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('JWT_SECRET');
+
+  // ⚠️ Stripe Webhook raw body (must come before any body parser)
+  app.use('/webhook', express.raw({ type: 'application/json' }));
+
+  // // Regular body parsers for other routes
+  // app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // Cookie parser for reading signed/unsigned cookies
   app.use(cookieParser(cookieSecret));
 
   // Enable validation globally
@@ -41,21 +51,21 @@ async function bootstrap() {
     prefix: '/uploads', // Access files via "/uploads/<filename>"
   });
 
-  // Swagger config
-  const config = new DocumentBuilder()
+  // Swagger API docs setup
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('E-COMMERCE-API')
     .setDescription(
       `
-    ## Authentication Flow
-    1. First call the /auth/login endpoint
-    2. It will set an httpOnly cookie named 'token'
-    3. All subsequent requests will automatically use this cookie
-  `,
+## Authentication Flow
+1. First call the /auth/login endpoint
+2. It will set an httpOnly cookie named 'token'
+3. All subsequent requests will automatically use this cookie
+    `,
     )
     .setVersion('1.0')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('', app, document, {
     swaggerOptions: {
       defaultModelsExpandDepth: -1, // cleaner UI
@@ -64,11 +74,12 @@ async function bootstrap() {
         if (a.get('path').includes('login')) return -1;
         return a.get('method').localeCompare(b.get('method'));
       },
-
       tagsSorter: 'alpha',
-      withCredentials: true, // crucial for cookies
+      withCredentials: true,
     },
   });
+
   await app.listen(process.env.PORT || 3000, '0.0.0.0');
 }
+
 bootstrap();
