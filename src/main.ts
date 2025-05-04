@@ -14,6 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
+  app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('JWT_SECRET');
 
