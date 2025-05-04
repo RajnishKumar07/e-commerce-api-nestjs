@@ -112,6 +112,7 @@ export class StripeController {
     const rawBody = req.rawBody;
     console.log('Raw Body:', req.rawBody?.toString());
     console.log('Headers:', req.headers);
+    console.log('signature', signature);
     try {
       const event = this.stripeService.constructEvent(rawBody, signature);
 

@@ -50,5 +50,12 @@ import { UserModule } from './modules/user/user.module';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggingMiddleware).forRoutes('*');
+    // consumer
+    //   // Apply raw-body parser only on the Stripe webhook POST path
+    //   .apply(RawBodyMiddleware)
+    //   .forRoutes({ path: '/stripe/webhook', method: RequestMethod.POST })
+    //   // Apply JSON parser for all other routes
+    //   .apply(JsonBodyMiddleware)
+    //   .forRoutes('*');
   }
 }

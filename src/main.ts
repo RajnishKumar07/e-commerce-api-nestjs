@@ -4,7 +4,6 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import * as express from 'express';
 import * as path from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -17,8 +16,6 @@ async function bootstrap() {
   // app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
   const configService = app.get(ConfigService);
   const cookieSecret = configService.get<string>('JWT_SECRET');
-
-  app.use(express.urlencoded({ extended: true }));
 
   // Cookie parser for reading signed/unsigned cookies
   app.use(cookieParser(cookieSecret));
